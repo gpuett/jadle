@@ -61,9 +61,32 @@ public class Sql2oFoodTypeDaoTest {
         assertEquals(0, foodTypeDao.getAll().size());
     }
 
+    @Test
+    public void addFoodTypeToRestaurantAddTypeCorrectly() throws Exception {
+        Restaurant testRestaurant = setupRestaurant();
+        Restaurant altRestaurant = setupAltRestaurant();
+        FoodType testFoodType = setupNewFoodtype();
+        foodTypeDao.add(testFoodType);
+        foodTypeDao.addFoodtypeToRestaurant(testFoodType, testRestaurant);
+        foodTypeDao.addFoodtypeToRestaurant(testFoodType, altRestaurant);
+        assertEquals(2, foodTypeDao.getAllRestaurantsForAFoodtype(testFoodType.getId()).size());
+    }
+
     // helpers
 
     public FoodType setupNewFoodtype(){
         return new FoodType("Sushi");
+    }
+
+    public Restaurant setupRestaurant (){
+        Restaurant restaurant = new Restaurant("Fish Witch", "214 NE Broadway", "97232", "503-402-9874", "http://fishwitch.com", "hellofishy@fishwitch.com");
+        restaurantDao.add(restaurant);
+        return restaurant;
+    }
+
+    public Restaurant setupAltRestaurant (){
+        Restaurant restaurant = new Restaurant("Fish Witch", "214 NE Broadway", "97232", "503-402-9874");
+        restaurantDao.add(restaurant);
+        return restaurant;
     }
 }

@@ -4,6 +4,8 @@ import models.*;
 import org.junit.*;
 import org.sql2o.*;
 
+import java.util.Arrays;
+
 import static org.junit.Assert.*;
 
 public class Sql2oRestaurantDaoTest {
@@ -79,6 +81,21 @@ public class Sql2oRestaurantDaoTest {
         Restaurant restaurant2 = setupRestaurant();
         restaurantDao.clearAll();
         assertEquals(0, restaurantDao.getAll().size());
+    }
+
+    @Test
+    public void restaurantReturnsFoodTypesCorrectly() {
+        FoodType testFoodType = new FoodType("Seafood");
+        foodTypeDao.add(testFoodType);
+        FoodType otherFoodType = new FoodType("Bar Food");
+        foodTypeDao.add(otherFoodType);
+        Restaurant testRestaurant = setupRestaurant();
+        restaurantDao.addRestaurantToFoodtype(testRestaurant, testFoodType);
+        restaurantDao.addRestaurantToFoodtype(testRestaurant, otherFoodType);
+
+        FoodType[] foodTypes = {testFoodType, otherFoodType};
+
+        assertEquals(Arrays.asList(foodTypes), restaurantDao.getAllFoodtypesByRestaurant(testRestaurant.getId()));
     }
 
     //helpers

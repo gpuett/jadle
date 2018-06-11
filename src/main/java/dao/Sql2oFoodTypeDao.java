@@ -1,10 +1,12 @@
 package dao;
 
 import models.FoodType;
+import models.Restaurant;
 import org.sql2o.Connection;
 import org.sql2o.Sql2o;
 import org.sql2o.Sql2oException;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Sql2oFoodTypeDao implements FoodTypeDao {
@@ -25,6 +27,42 @@ public class Sql2oFoodTypeDao implements FoodTypeDao {
         } catch (Sql2oException ex) {
             System.out.println(ex);
         }
+    }
+
+    @Override
+    public void addFoodtypeToRestaurant(FoodType foodType, Restaurant restaurant) {
+        String sql = "INSERT INTO restaurants_foodtypes (restaurantid, foodtypeid) VALUES (:restaurantId, :foodtypeId)";
+        try (Connection con = sql2o.open()) {
+            con.createQuery(sql)
+                    .addParameter("restaurantId", restaurant.getId())
+                    .addParameter("foodtypeId", foodType.getId())
+                    .executeUpdate();
+        } catch (Sql2oException ex) {
+            System.out.println(ex);
+        }
+    }
+
+    @Override
+    public List<Restaurant> getAllRestaurantsForAFoodtype(int foodtypeId) {
+        List<Restaurant> restaurants = new ArrayList<>();
+
+        String joinQuery = "SELECT restaurantid FROM restaurants_foodtypes WHERE foodtypeid = :foodtypeId";
+
+        try (Connection con = sql2o.open()) {
+            List<Integer> allRestaurantIds = con.createQuery(joinQuery)
+                    .addParameter("foodtypeId", foodtypeId)
+                    .executeAndFetch(Integer.class);
+            for (Integer restaurantId : allRestaurantIds) {
+                String restaurantQuery = "SELECT * FROM restaurants WHERE id = :restaurantId";
+                restaurants.add(
+                        con.createQuery(restaurantQuery)
+                        .addParameter("restaurantId", restaurantId)
+                        .executeAndFetchFirst(Restaurant.class));
+            }
+        } catch (Sql2oException ex) {
+            System.out.println(ex);
+        }
+        return restaurants;
     }
 
     @Override
