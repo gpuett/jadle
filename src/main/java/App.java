@@ -2,6 +2,7 @@ import com.google.gson.Gson;
 import dao.Sql2oFoodTypeDao;
 import dao.Sql2oRestaurantDao;
 import dao.Sql2oReviewDao;
+import exceptions.ApiException;
 import models.FoodType;
 import models.Restaurant;
 import models.Review;
@@ -54,6 +55,21 @@ public class App {
             return gson.toJson(review);
         });
 
+        post("/restaurants/:restaurantId/foodtype/:foodtypeId", "application/json", (request, response) -> {
+           int restaurantId = Integer.parseInt(request.params("restaurantId"));
+           int foodtypeId = Integer.parseInt(request.params("foodtypeId"));
+           Restaurant restaurant = restaurantDao.findById(restaurantId);
+           FoodType foodType = foodTypeDao.findById(foodtypeId);
+
+           if (restaurant != null && foodType != null) {
+               foodTypeDao.addFoodtypeToRestaurant(foodType, restaurant);
+               response.status(201);
+               return gson.toJson(String.format("Restaurant '%s' and Foodtype '%s' have been associated", foodType.getName(), restaurant.getName()));
+           } else {
+               throw new ApiException(404, String.format("Restaurant od Footype does not exist"));
+           }
+        });
+
         //READ
         get("/restaurants", "application/json", (request, response) -> {
             System.out.println(restaurantDao.getAll());
@@ -71,9 +87,9 @@ public class App {
 
            Restaurant restaurantToFind = restaurantDao.findById(restaurantId);
 
-//           if(restaurantToFind == null) {
-//               throw new ApiException(404, String.format("No restaurant with the id: \"%s\" exists", req.params("id")));
-//           }
+           if(restaurantToFind == null) {
+               throw new ApiException(404, String.format("No restaurant with the id: \"%s\" exists", request.params("id")));
+           }
 
            return gson.toJson(restaurantToFind);
         });
@@ -86,9 +102,9 @@ public class App {
            int restaurantId = Integer.parseInt(request.params("restaurantId"));
            Restaurant restaurantToFind = restaurantDao.findById(restaurantId);
 
-//            if (restaurantToFind == null){
-//                throw new ApiException(404, String.format("No restaurant with the id: \"%s\" exists", req.params("id")));
-//            }
+            if (restaurantToFind == null){
+                throw new ApiException(404, String.format("No restaurant with the id: \"%s\" exists", request.params("id")));
+            }
 
             List<Review> allReviews = reviewDao.getAllReviewsByRestaurantId(restaurantId);
            return gson.toJson(allReviews);
@@ -96,15 +112,15 @@ public class App {
 
 
         //FILTERS
-//        exception(ApiException.class, (exception, request, response) -> {
-//            ApiException err = (ApiException) exception;
-//            Map<String, Object> jsonMap = new HashMap<>();
-//            jsonMap.put("status", err.getStatusCode());
-//            jsonMap.put("errorMessage", err.getMessage());
-//            response.type("application/json");
-//            response.status(err.getStatusCode());
-//            response.body(gson.toJson(jsonMap));
-//        });
+        exception(ApiException.class, (exception, request, response) -> {
+            ApiException err = (ApiException) exception;
+            Map<String, Object> jsonMap = new HashMap<>();
+            jsonMap.put("status", err.getStatusCode());
+            jsonMap.put("errorMessage", err.getMessage());
+            response.type("application/json");
+            response.status(err.getStatusCode());
+            response.body(gson.toJson(jsonMap));
+        });
 
 
         after((request, response) -> {

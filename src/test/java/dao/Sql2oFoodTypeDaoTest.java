@@ -73,6 +73,13 @@ public class Sql2oFoodTypeDaoTest {
     }
 
     @Test
+    public void findFoodTypeById() {
+        FoodType foodType = setupNewFoodtype();
+        foodTypeDao.add(foodType);
+        assertEquals(foodType, foodTypeDao.findById(foodType.getId()));
+    }
+
+    @Test
     public void deletingFoodTypeAlsoUpdatesJoinTable() {
         FoodType testFoodType = new FoodType("Seafood");
         foodTypeDao.add(testFoodType);
