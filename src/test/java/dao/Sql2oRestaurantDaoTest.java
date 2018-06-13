@@ -9,15 +9,15 @@ import java.util.Arrays;
 import static org.junit.Assert.*;
 
 public class Sql2oRestaurantDaoTest {
-    private Connection conn;
-    private Sql2oRestaurantDao restaurantDao;
-    private Sql2oFoodTypeDao foodTypeDao;
-    private Sql2oReviewDao reviewDao;
+    private static Connection conn;
+    private static Sql2oRestaurantDao restaurantDao;
+    private static Sql2oFoodTypeDao foodTypeDao;
+    private static Sql2oReviewDao reviewDao;
 
-    @Before
-    public void setUp() throws Exception {
-        String connectionString = "jdbc:h2:mem:testing;INIT=RUNSCRIPT from 'classpath:db/create.sql'";
-        Sql2o sql2o = new Sql2o(connectionString, "", "");
+    @BeforeClass
+    public static void setUp() throws Exception {
+        String connectionString = "jdbc:postgresql://localhost:5432/jadle_test";
+        Sql2o sql2o = new Sql2o(connectionString, null, null);
         restaurantDao = new Sql2oRestaurantDao(sql2o);
         foodTypeDao = new Sql2oFoodTypeDao(sql2o);
         reviewDao = new Sql2oReviewDao(sql2o);
@@ -26,7 +26,16 @@ public class Sql2oRestaurantDaoTest {
 
     @After
     public void tearDown() throws Exception {
+        System.out.println("clearing database");
+        restaurantDao.clearAll();
+        foodTypeDao.clearAll();
+        reviewDao.clearAll();
+    }
+
+    @AfterClass
+    public static void shutDown() throws Exception {
         conn.close();
+        System.out.println("connection closed");
     }
 
     @Test
