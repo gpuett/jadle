@@ -17,9 +17,12 @@ import java.util.Map;
 import static spark.Spark.*;
 
 public class App {
+    private static boolean isProduction = false;
+
     static int getHerokuAssignedPort() {
         ProcessBuilder processBuilder = new ProcessBuilder();
         if (processBuilder.environment().get("PORT") != null) {
+            isProduction = true;
             return Integer.parseInt(processBuilder.environment().get("PORT"));
         }
         return 4567;
@@ -34,10 +37,14 @@ public class App {
         Sql2oReviewDao reviewDao;
         Connection conn;
         Gson gson = new Gson();
-//        String connectionString = "jdbc:postgresql://localhost:5432/jadle";
-//        Sql2o sql2o = new Sql2o(connectionString, null, null);
-        String connectionString = "jdbc:postgresql://ec2-50-16-241-91.compute-1.amazonaws.com:5432/d4ktfn9loh8rmh";
-        Sql2o sql2o = new Sql2o(connectionString, "fawtgwyejuwger", "d5f9f9f6f95b06b5e0e19490a459f35a93358fe932d442899ff134e6aa3349d1" )
+        Sql2o sql2o;
+        if(isProduction) {
+            String connectionString = "jdbc:postgresql://ec2-50-16-241-91.compute-1.amazonaws.com:5432/d4ktfn9loh8rmh";
+            sql2o = new Sql2o(connectionString, "fawtgwyejuwger", "d5f9f9f6f95b06b5e0e19490a459f35a93358fe932d442899ff134e6aa3349d1" );
+        } else {
+            String connectionString = "jdbc:postgresql://localhost:5432/jadle";
+            sql2o = new Sql2o(connectionString, null, null);
+        }
         restaurantDao = new Sql2oRestaurantDao(sql2o);
         foodTypeDao = new Sql2oFoodTypeDao(sql2o);
         reviewDao = new Sql2oReviewDao(sql2o);
