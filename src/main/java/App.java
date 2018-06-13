@@ -34,8 +34,10 @@ public class App {
         Sql2oReviewDao reviewDao;
         Connection conn;
         Gson gson = new Gson();
-        String connectionString = "jdbc:postgresql://localhost:5432/jadle";
-        Sql2o sql2o = new Sql2o(connectionString, null, null);
+//        String connectionString = "jdbc:postgresql://localhost:5432/jadle";
+//        Sql2o sql2o = new Sql2o(connectionString, null, null);
+        String connectionString = "jdbc:postgresql://ec2-50-16-241-91.compute-1.amazonaws.com:5432/d4ktfn9loh8rmh";
+        Sql2o sql2o = new Sql2o(connectionString, "fawtgwyejuwger", "d5f9f9f6f95b06b5e0e19490a459f35a93358fe932d442899ff134e6aa3349d1" )
         restaurantDao = new Sql2oRestaurantDao(sql2o);
         foodTypeDao = new Sql2oFoodTypeDao(sql2o);
         reviewDao = new Sql2oReviewDao(sql2o);
