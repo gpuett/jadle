@@ -49,6 +49,8 @@ public class App {
         post("/restaurants/:restaurantId/reviews/new", "application/json", (request, response) -> {
             int restaurantId = Integer.parseInt(request.params("restaurantId"));
             Review review = gson.fromJson(request.body(), Review.class);
+            review.setCreatedAt();
+            review.setFormattedCreatedAt();
             review.setRestaurantId(restaurantId);
             reviewDao.add(review);
             response.status(201);
@@ -132,6 +134,17 @@ public class App {
            } else {
                return gson.toJson(foodTypeDao.getAllRestaurantsForAFoodtype(foodtypeId));
            }
+        });
+
+        get("restaurants/:id/sortedReviews", "application/json", (request, response) -> {
+           int restaurantId = Integer.parseInt(request.params("id"));
+           Restaurant restaurantToFind = restaurantDao.findById(restaurantId);
+           List<Review> allReviews;
+           if (restaurantToFind == null) {
+               throw new ApiException(404, String.format("No restaurant with the id: '%s' exists", request.params("id")));
+           }
+           allReviews = reviewDao.getAllReviewsByRestaurantSortedNewestToOldest(restaurantId);
+           return gson.toJson(allReviews);
         });
 
 

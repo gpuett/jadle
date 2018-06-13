@@ -68,6 +68,50 @@ public class Sql2oReviewDaoTest {
         assertEquals(0, reviewDao.getAll().size());
     }
 
+    @Test
+    public void timeStampIsReturnedCorrectly() throws Exception {
+        Restaurant restaurant = setupRestaurant();
+        Review review = new Review("foodcoma!", "Captain Kirk", 3,  restaurant.getId());
+        reviewDao.add(review);
+        long creationTime = review.getCreatedAt();
+        long savedTime = reviewDao.getAll().get(0).getCreatedAt();
+        String formattedCreationTime = review.getFormattedCreatedAt();
+        String formattedDSavedime = reviewDao.getAll().get(0).getFormattedCreatedAt();
+        assertEquals(formattedCreationTime, formattedDSavedime);
+        assertEquals(creationTime, savedTime);
+    }
+
+    @Test
+    public void reviewsAreReturnedInCorrectOrder() throws Exception {
+        Restaurant restaurant = setupRestaurant();
+        Review review1 = new Review("foodcoma!", "Captain Kirk", 3,  restaurant.getId());
+        reviewDao.add(review1);
+        try {
+            Thread.sleep(2000);
+        } catch (InterruptedException ex) {
+            ex.printStackTrace();
+        }
+
+        Review review2 = new Review("passable", "Mr Spock", 1, restaurant.getId());
+        reviewDao.add(review2);
+        try {
+            Thread.sleep(2000);
+        } catch (InterruptedException ex) {
+            ex.printStackTrace();
+        }
+        Review review3 = new Review("bloody good grub", "Scotty", 4, restaurant.getId());
+        reviewDao.add(review3);
+        try {
+            Thread.sleep(2000);
+        } catch (InterruptedException ex) {
+            ex.printStackTrace();
+        }
+        Review review4 = new Review("I prefer home cooking", "Mr Sulu", 2, restaurant.getId());
+        reviewDao.add(review4);
+        assertEquals(4, reviewDao.getAllReviewsByRestaurantId(restaurant.getId()).size());
+        assertEquals("I prefer home cooking", reviewDao.getAllReviewsByRestaurantSortedNewestToOldest(restaurant.getId()).get(0).getContent());
+    }
+
     //helpers
 
     public Review setupReview() {
